@@ -1,7 +1,7 @@
-const utilNotification = require('../notifications/util');
+const util = require('./util');
 const Page = require('../core/page');
 const params = require('../params');
-const util = require('./util');
+const pe = require('../core/elements');
 
 class Audio {
   constructor() {
@@ -15,11 +15,6 @@ class Audio {
     await this.page2.init(Page.getArgsWithAudio(), this.page1.meetingId, { ...params, fullName: 'BroadCaster2' });
     await this.page1.joinMicrophone();
     await this.page2.joinMicrophone();
-  }
-
-  async initOneUser(page,meetingId) {
-    await page.init(Page.getArgsWithAudio(), meetingId, {...params, fullName: 'User1'});
-    await page.joinMicrophone();
   }
 
   async test() {
@@ -46,11 +41,6 @@ class Audio {
     const doneCheckingIsTalkingIndicator = wasTalkingIndicatorUser1 && wasTalkingIndicatorUser2;
     const response = doneCheckingIsTalkingIndicator == true;
     return response;
-  }
-
-  async audioNotification(page) {
-    const resp = await utilNotification.getLastToastValue(page);
-    return resp;
   }
 
   async close() {

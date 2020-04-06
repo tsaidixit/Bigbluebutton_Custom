@@ -99,9 +99,17 @@ const messages = defineMessages({
     id: 'app.userList.menu.directoryLookup.label',
     description: 'Directory lookup',
   },
-  handAlertLabel: {
-    id: 'app.userList.handAlert',
-    description: 'text displayed in raise hand toast',
+  removeFromWaitingListLabel: {
+    id: 'app.userList.menu.resetEmojiStatus.label',
+    description: 'label to remove from waiting list',
+  },
+  removeMeetingRequestLabel: {
+    id: 'app.userList.menu.removeMeetingRequest.label',
+    description: 'label to remove meeting request',
+  },
+  requestOneToOneCommunicationLabel: {
+    id: 'app.userList.menu.requestOneToOneCommunication.label',
+    description: 'label to request One To One Communication',
   },
 });
 
@@ -118,7 +126,6 @@ const propTypes = {
 };
 const CHAT_ENABLED = Meteor.settings.public.chat.enabled;
 const ROLE_MODERATOR = Meteor.settings.public.user.role_moderator;
-const MAX_ALERT_RANGE = 550;
 
 class UserDropdown extends PureComponent {
   /**
@@ -142,8 +149,6 @@ class UserDropdown extends PureComponent {
       dropdownVisible: false,
       showNestedOptions: false,
     };
-
-    this.audio = new Audio(`${Meteor.settings.public.app.cdn + Meteor.settings.public.app.basename}/resources/sounds/bbb-handRaise.mp3`);
 
     this.handleScroll = this.handleScroll.bind(this);
     this.onActionsShow = this.onActionsShow.bind(this);
@@ -213,6 +218,7 @@ class UserDropdown extends PureComponent {
       voiceUser,
       getAvailableActions,
       getGroupChatPrivate,
+      getEmoji,
       getEmojiList,
       setEmojiStatus,
       assignPresenter,
@@ -286,20 +292,76 @@ class UserDropdown extends PureComponent {
       return actions;
     }
 
+    // if (allowedToChangeStatus && isMeteorConnected) {
+    //   actions.push(this.makeDropdownItem(
+    //     'setstatus',
+    //     intl.formatMessage(messages.statusTriggerLabel),
+    //     () => this.setState(
+    //       {
+    //         showNestedOptions: true,
+    //         isActionsOpen: true,
+    //       }, Session.set('dropdownOpen', true),
+    //     ),
+    //     'user',
+    //     'right_arrow',
+    //   ));
+    // }
     if (allowedToChangeStatus && isMeteorConnected) {
-      actions.push(this.makeDropdownItem(
-        'setstatus',
-        intl.formatMessage(messages.statusTriggerLabel),
-        () => this.setState(
-          {
-            showNestedOptions: true,
-            isActionsOpen: true,
-          }, Session.set('dropdownOpen', true),
-        ),
-        'user',
-        'right_arrow',
-      ));
+
+
+      // actions.push(this.makeDropdownItem(
+      //   'setstatus',
+      //   intl.formatMessage(messages.statusTriggerLabel),
+      //   () => this.setState(
+      //     {
+      //       showNestedOptions: true,
+      //       isActionsOpen: true,
+      //     }, Session.set('dropdownOpen', true),
+      //   ),
+      //   'user',
+      //   'right_arrow',
+      // ));
     }
+
+    if(currentUser.userId!== user.userId && user.role === ROLE_MODERATOR && currentUser.emoji !== 'raiseHand' ){
+
+      console.log("current user");
+      console.log(JSON.stringify(currentUser));
+
+      console.log("user");
+      console.log(JSON.stringify(user));
+
+      console.log("Emoji");
+      console.log(getEmoji);
+
+      if(getEmoji && getEmoji === "raiseHand"){
+        actions.push(this.makeDropdownItem(
+          'clearStatus',
+          intl.formatMessage(messages.removeMeetingRequestLabel),
+          () => this.onActionsHide(setEmojiStatus(currentUser.userId, 'none')),
+          'clear_status',
+        ));
+
+      }else{
+        actions.push(this.makeDropdownItem(
+          'requestMeeting',
+          intl.formatMessage(messages.requestOneToOneCommunicationLabel),
+          () => this.onActionsHide(setEmojiStatus(currentUser.userId, 'raiseHand')),
+          'user',
+        ));
+
+      }
+    }
+
+    // if(user.role === ROLE_MODERATOR && currentUser.emoji === 'raiseHand' ){
+    //   actions.push(this.makeDropdownItem(
+    //     'clearStatus',
+    //     intl.formatMessage(messages.removeMeetingRequestLabel),
+    //     () => this.onActionsHide(setEmojiStatus(user.userId, 'none')),
+    //     'clear_status',
+    //   ));
+    // }
+
 
     if (CHAT_ENABLED && enablePrivateChat && isMeteorConnected) {
       actions.push(this.makeDropdownItem(
@@ -317,7 +379,7 @@ class UserDropdown extends PureComponent {
     if (allowedToResetStatus && user.emoji !== 'none' && isMeteorConnected) {
       actions.push(this.makeDropdownItem(
         'clearStatus',
-        intl.formatMessage(messages.ClearStatusLabel),
+        intl.formatMessage(messages.removeMeetingRequestLabel),
         () => this.onActionsHide(setEmojiStatus(user.userId, 'none')),
         'clear_status',
       ));
@@ -487,17 +549,12 @@ class UserDropdown extends PureComponent {
 
   renderUserAvatar() {
     const {
-      intl,
       normalizeEmojiName,
       user,
-      currentUser,
       userInBreakout,
       breakoutSequence,
       meetingIsBreakout,
       voiceUser,
-      notify,
-      raiseHandAudioAlert,
-      raiseHandPushAlert,
     } = this.props;
 
     const { clientType } = user;
@@ -509,18 +566,6 @@ class UserDropdown extends PureComponent {
 
     const iconVoiceOnlyUser = (<Icon iconName="audio_on" />);
     const userIcon = isVoiceOnly ? iconVoiceOnlyUser : iconUser;
-    const shouldAlert = user.emoji === 'raiseHand'
-      && currentUser.userId !== user.userId
-      && new Date() - user.emojiTime < MAX_ALERT_RANGE;
-
-    if (shouldAlert) {
-      if (raiseHandAudioAlert) this.audio.play();
-      if (raiseHandPushAlert) {
-        notify(
-          `${user.name} ${intl.formatMessage(messages.handAlertLabel)}`, 'info', 'hand',
-        );
-      }
-    }
 
     return (
       <UserAvatar

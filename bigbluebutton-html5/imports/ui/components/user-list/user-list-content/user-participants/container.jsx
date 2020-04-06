@@ -8,5 +8,7 @@ const UserParticipantsContainer = props => <UserParticipants {...props} />;
 
 export default withTracker(() => ({
   users: UserListService.getUsers(),
+  tutorsAvailable: UserListService.getTutorsAvailable(),
+  waitingUsersAvailable: UserListService.getWaitingUsersAvailable(),
   meetingIsBreakout: meetingIsBreakout(),
 }))(UserParticipantsContainer);

@@ -128,7 +128,6 @@ class ActionsDropdown extends PureComponent {
         ? (
           <DropdownListItem
             icon="polling"
-            data-test="polling"
             label={formatMessage(pollBtnLabel)}
             description={formatMessage(pollBtnDesc)}
             key={this.pollId}

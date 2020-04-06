@@ -50,10 +50,6 @@ class MultiUsers {
     await this.page1.close();
     await this.page2.close();
   }
-
-  async closePage(page) {
-    await page.close();
-  }
 }
 
 module.exports = exports = MultiUsers;

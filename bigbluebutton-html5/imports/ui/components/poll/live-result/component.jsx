@@ -206,7 +206,6 @@ class LiveResult extends PureComponent {
                 stopPoll();
               }}
               label={intl.formatMessage(intlMessages.publishLabel)}
-              data-test="publishLabel"
               color="primary"
               className={styles.btn}
             />

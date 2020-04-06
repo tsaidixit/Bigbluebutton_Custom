@@ -61,6 +61,18 @@ const sortUsersByName = (a, b) => {
   return 0;
 };
 
+const sortUsersByEmojiTime = (a, b) => {
+  if (a.emoji && b.emoji && (a.emoji === 'raiseHand' && b.emoji === 'raiseHand')) {
+    if (a.emojiTime < b.emojiTime) {
+      return -1;
+    }
+    if (a.emojiTime > b.emojiTime) {
+      return 1;
+    }
+  }
+  return 0;
+};
+
 const sortUsersByEmoji = (a, b) => {
   if (a.emoji && b.emoji && (a.emoji !== 'none' && b.emoji !== 'none')) {
     if (a.emojiTime < b.emojiTime) {
@@ -190,6 +202,31 @@ const userFindSorting = {
   userId: 1,
 };
 
+const getTutorsAvailable = () => {
+  let users = Users
+    .find({
+      meetingId: Auth.meetingID,
+      connectionStatus: 'online',
+    }, userFindSorting)
+    .fetch();
+
+  const currentUser = Users.findOne({ userId: Auth.userID }, { fields: { role: 1, locked: 1 } });
+  if (currentUser && currentUser.role === ROLE_VIEWER && currentUser.locked) {
+    const meeting = Meetings.findOne({ meetingId: Auth.meetingID },
+      { fields: { 'lockSettingsProps.hideUserList': 1 } });
+    if (meeting && meeting.lockSettingsProps && meeting.lockSettingsProps.hideUserList) {
+      const moderatorOrCurrentUser = u => u.role === ROLE_MODERATOR || u.userId === Auth.userID;
+      users = users.filter(moderatorOrCurrentUser);
+    }
+  }
+
+  const testUsers = users.filter(user => user.role === ROLE_MODERATOR);
+
+
+  // console.log(JSON.stringify(users.map(user => user.role)));
+  return testUsers.sort(sortUsers);
+};
+
 const getUsers = () => {
   let users = Users
     .find({
@@ -208,7 +245,34 @@ const getUsers = () => {
     }
   }
 
+  // let testUsers = users.filter( user => user.role === ROLE_MODERATOR);
+
+
+  console.log(JSON.stringify(users));
   return users.sort(sortUsers);
+};
+
+const getWaitingUsersAvailable = () => {
+  let users = Users
+    .find({
+      meetingId: Auth.meetingID,
+      connectionStatus: 'online',
+    }, userFindSorting)
+    .fetch();
+
+  const currentUser = Users.findOne({ userId: Auth.userID }, { fields: { role: 1, locked: 1 } });
+  if (currentUser && currentUser.role === ROLE_VIEWER && currentUser.locked) {
+    const meeting = Meetings.findOne({ meetingId: Auth.meetingID },
+      { fields: { 'lockSettingsProps.hideUserList': 1 } });
+    if (meeting && meeting.lockSettingsProps && meeting.lockSettingsProps.hideUserList) {
+      const moderatorOrCurrentUser = u => u.role === ROLE_MODERATOR || u.userId === Auth.userID;
+      users = users.filter(moderatorOrCurrentUser);
+    }
+  }
+  console.log(JSON.stringify(users));
+  const testUsers = users.filter(user => user.emoji === 'raiseHand');
+  console.log(JSON.stringify(testUsers));
+  return testUsers.sort(sortUsersByEmojiTime);
 };
 
 const hasBreakoutRoom = () => Breakouts.find({ parentMeetingId: Auth.meetingID },
@@ -528,6 +592,8 @@ export default {
   muteAllExceptPresenter,
   changeRole,
   getUsers,
+  getTutorsAvailable,
+  getWaitingUsersAvailable,
   getActiveChats,
   getAvailableActions,
   curatedVoiceUser,

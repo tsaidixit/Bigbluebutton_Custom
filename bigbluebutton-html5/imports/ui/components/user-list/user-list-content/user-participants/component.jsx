@@ -15,6 +15,8 @@ const propTypes = {
     formatMessage: PropTypes.func.isRequired,
   }).isRequired,
   currentUser: PropTypes.shape({}).isRequired,
+  tutorsAvailable: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  waitingUsersAvailable: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   users: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   setEmojiStatus: PropTypes.func.isRequired,
   roving: PropTypes.func.isRequired,
@@ -39,6 +41,14 @@ const intlMessages = defineMessages({
     id: 'app.userList.usersTitle',
     description: 'Title for the Header',
   },
+  waitingUsersTitle: {
+    id: 'app.userList.waitingListUsersTitle',
+    description: 'Title for the Waiting list Header',
+  },
+  tutorsTitle: {
+    id: 'app.userList.turorsTitle',
+    description: 'Title for the tutors list',
+  },
 });
 
 const ROLE_MODERATOR = Meteor.settings.public.user.role_moderator;
@@ -57,6 +67,8 @@ class UserParticipants extends Component {
     this.rove = this.rove.bind(this);
     this.changeState = this.changeState.bind(this);
     this.getUsers = this.getUsers.bind(this);
+    this.getTutorsAvailable = this.getTutorsAvailable.bind(this);
+    this.getWaitingUsersAvailable = this.getWaitingUsersAvailable.bind(this);
   }
 
   componentDidMount() {
@@ -92,6 +104,86 @@ class UserParticipants extends Component {
 
   getScrollContainerRef() {
     return this.refScrollContainer;
+  }
+
+  getWaitingUsersAvailable() {
+    const {
+      compact,
+      setEmojiStatus,
+      waitingUsersAvailable,
+      requestUserInformation,
+      currentUser,
+      meetingIsBreakout,
+    } = this.props;
+
+    let index = -1;
+
+    return waitingUsersAvailable.map(u => (
+      <CSSTransition
+        classNames={listTransition}
+        appear
+        enter
+        exit
+        timeout={0}
+        component="div"
+        className={cx(styles.participantsList)}
+        key={u.userId}
+      >
+        <div ref={(node) => { this.userRefs[index += 1] = node; }}>
+          <UserListItemContainer
+            {...{
+              compact,
+              setEmojiStatus,
+              requestUserInformation,
+              currentUser,
+              meetingIsBreakout,
+            }}
+            user={u}
+            getScrollContainerRef={this.getScrollContainerRef}
+          />
+        </div>
+      </CSSTransition>
+    ));
+  }
+
+  getTutorsAvailable() {
+    const {
+      compact,
+      setEmojiStatus,
+      tutorsAvailable,
+      requestUserInformation,
+      currentUser,
+      meetingIsBreakout,
+    } = this.props;
+
+    let index = -1;
+
+    return tutorsAvailable.map(u => (
+      <CSSTransition
+        classNames={listTransition}
+        appear
+        enter
+        exit
+        timeout={0}
+        component="div"
+        className={cx(styles.participantsList)}
+        key={u.userId}
+      >
+        <div ref={(node) => { this.userRefs[index += 1] = node; }}>
+          <UserListItemContainer
+            {...{
+              compact,
+              setEmojiStatus,
+              requestUserInformation,
+              currentUser,
+              meetingIsBreakout,
+            }}
+            user={u}
+            getScrollContainerRef={this.getScrollContainerRef}
+          />
+        </div>
+      </CSSTransition>
+    ));
   }
 
   getUsers() {
@@ -149,6 +241,8 @@ class UserParticipants extends Component {
     const {
       intl,
       users,
+      tutorsAvailable,
+      waitingUsersAvailable,
       compact,
       setEmojiStatus,
       currentUser,
@@ -161,12 +255,7 @@ class UserParticipants extends Component {
           !compact
             ? (
               <div className={styles.container}>
-                <h2 className={styles.smallTitle}>
-                  {intl.formatMessage(intlMessages.usersTitle)}
-                  &nbsp;(
-                  {users.length}
-                  )
-                </h2>
+                <h2 className={styles.smallTitle} />
                 {currentUser.role === ROLE_MODERATOR
                   ? (
                     <UserOptionsContainer {...{
@@ -187,11 +276,86 @@ class UserParticipants extends Component {
           tabIndex={0}
           ref={(ref) => { this.refScrollContainer = ref; }}
         >
-          <div className={styles.list}>
-            <TransitionGroup ref={(ref) => { this.refScrollItems = ref; }}>
-              {this.getUsers()}
-            </TransitionGroup>
+
+          {
+            !meetingIsBreakout ? (
+              <div>
+                <h2 className={styles.smallTitle}>
+                  {intl.formatMessage(intlMessages.tutorsTitle)}
+                        &nbsp;(
+                  {tutorsAvailable.length}
+                        )
+                </h2>
+                <div className={styles.list}>
+                  <TransitionGroup ref={(ref) => { this.refScrollItems = ref; }}>
+                    {this.getTutorsAvailable()}
+                  </TransitionGroup>
+                </div>
+              </div>
+            ): null
+
+          }
+          {
+            !meetingIsBreakout ? (
+              <div>
+                <h2 className={styles.smallTitle}>
+                  {intl.formatMessage(intlMessages.waitingUsersTitle)}
+                        &nbsp;(
+                  {waitingUsersAvailable.length}
+                        )
+                </h2>
+                <div className={styles.list}>
+                  <TransitionGroup ref={(ref) => { this.refScrollItems = ref; }}>
+                    {this.getWaitingUsersAvailable()}
+                  </TransitionGroup>
+                </div>
+              </div>
+            ): null
+
+          }
+
+          {/* <div>
+            <h2 className={styles.smallTitle}>
+              {intl.formatMessage(intlMessages.tutorsTitle)}
+                    &nbsp;(
+              {tutorsAvailable.length}
+                    )
+            </h2>
+            <div className={styles.list}>
+              <TransitionGroup ref={(ref) => { this.refScrollItems = ref; }}>
+                {this.getTutorsAvailable()}
+              </TransitionGroup>
+            </div>
           </div>
+
+          <div>
+            <h2 className={styles.smallTitle}>
+              {intl.formatMessage(intlMessages.waitingUsersTitle)}
+                    &nbsp;(
+              {waitingUsersAvailable.length}
+                    )
+            </h2>
+            <div className={styles.list}>
+              <TransitionGroup ref={(ref) => { this.refScrollItems = ref; }}>
+                {this.getWaitingUsersAvailable()}
+              </TransitionGroup>
+            </div>
+          </div> */}
+
+          <div>           
+            <h2 className={styles.smallTitle}>
+              {intl.formatMessage(intlMessages.usersTitle)}
+                    &nbsp;(
+              {users.length}
+                    )
+            </h2>
+            <div className={styles.list}>
+              <TransitionGroup ref={(ref) => { this.refScrollItems = ref; }}>
+                {this.getUsers()}
+              </TransitionGroup>
+            </div>
+          </div>
+
         </div>
       </div>
     );

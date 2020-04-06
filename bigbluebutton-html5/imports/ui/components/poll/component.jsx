@@ -174,7 +174,6 @@ class Poll extends Component {
           label={label}
           color="default"
           className={styles.pollBtn}
-          data-test="pollBtn"
           key={_.uniqueId('quick-poll-')}
           onClick={() => {
             Session.set('pollInitiated', true);
@@ -339,7 +338,6 @@ class Poll extends Component {
         <header className={styles.header}>
           <Button
             ref={(node) => { this.hideBtn = node; }}
-            data-test="hidePollDesc"
             tabIndex={0}
             label={intl.formatMessage(intlMessages.pollPaneTitle)}
             icon="left_arrow"

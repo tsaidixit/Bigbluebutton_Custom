@@ -10,7 +10,7 @@ public:
     clientTitle: BigBlueButton
     appName: BigBlueButton HTML5 Client
     bbbServerVersion: 2.2-dev
-    copyright: "©2020 BigBlueButton Inc."
+    copyright: "©2019 BigBlueButton Inc."
     html5ClientBuild: HTML5_CLIENT_VERSION
     helpLink: https://bigbluebutton.org/html5/
     lockOnJoin: true
@@ -33,8 +33,6 @@ public:
         chatPushAlerts: false
         userJoinAudioAlerts: false
         userJoinPushAlerts: false
-        raiseHandAudioAlerts: false
-        raiseHandPushAlerts: false
         fallbackLocale: en
         overrideLocale: null
       audio:
@@ -88,7 +86,7 @@ public:
     enableNetworkMonitoring: false
     packetLostThreshold: 10
   kurento:
-    wsUrl: HOST
+    wsUrl: ws://10.0.2.15/bbb-webrtc-sfu
     chromeDefaultExtensionKey: akgoaoikmbmhcopjgakkcepdgdgkjfbc
     chromeDefaultExtensionLink: https://chrome.google.com/webstore/detail/bigbluebutton-screenshare/akgoaoikmbmhcopjgakkcepdgdgkjfbc
     chromeExtensionKey: KEY

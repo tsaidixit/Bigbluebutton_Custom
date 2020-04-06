@@ -160,7 +160,7 @@ class App extends Component {
       notify(
         currentUserEmoji.status === 'none'
           ? intl.formatMessage(intlMessages.clearedEmoji)
-          : intl.formatMessage(intlMessages.setEmoji, ({ 0: formattedEmojiStatus })),
+          : intl.formatMessage(intlMessages.setEmoji),
         'info',
         currentUserEmoji.status === 'none'
           ? 'clear_status'
