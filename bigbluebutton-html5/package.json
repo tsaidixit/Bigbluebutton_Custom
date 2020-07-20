@@ -46,7 +46,7 @@
     "flat": "~4.1.0",
     "immutability-helper": "~2.8.1",
     "langmap": "0.0.16",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "makeup-screenreader-trap": "0.0.5",
     "meteor-node-stubs": "^0.4.1",
     "node-sass": "^4.13.1",
